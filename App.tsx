@@ -2,17 +2,20 @@ import React from 'react';
 import { Routes } from './src/routes';
 import { SafeAreaView, StatusBar, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
+import { LibReduxProvider } from './src/lib/libReduxProvider';
 
 function App(): React.JSX.Element {
 
   return (
-    <NavigationContainer>
-        <StatusBar
-          // barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-          backgroundColor={'#000'}
-        />
-        <Routes/>
-    </NavigationContainer>
+    <LibReduxProvider>
+      <NavigationContainer>
+          <StatusBar
+            // barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+            backgroundColor={'#000'}
+          />
+          <Routes/>
+      </NavigationContainer>
+    </LibReduxProvider>
   );
 }
 
