@@ -7,6 +7,7 @@ import { AppTabBar } from "./tab.routes";
 export function Routes() {
 
     return (
-        <AppTabBar/>
+        <AuthRoutes/>
+        // <AppTabBar/>
     )
 }
