@@ -19,6 +19,7 @@ const Stack = createNativeStackNavigator();
 
 const TabButton = (props) => {
   const { item, onPress, accessibilityState } = props;
+  const focused = accessibilityState.selected;
 
   return (
     <TouchableOpacity
@@ -38,8 +39,8 @@ const TabButton = (props) => {
           alignItems: "center",
           // marginBottom: 20
         }}>
-        <Text style={{color: '#000',  fontSize: 10, textAlign: "center"}}>
-          {item.label}
+        <Text style={{color: '#000',  fontSize: focused ? 15 : 10, textAlign: "center"}}>
+          {item}
         </Text>
       </View>
     </TouchableOpacity>
