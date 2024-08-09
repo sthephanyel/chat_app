@@ -2,9 +2,11 @@ import React from "react";
 import { SafeAreaView, Text, View } from "react-native";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
+import { AuthGoogleComponent } from "../../components/auth";
 
 export default function Login(){
     const { editProfile } = useSelector((state: RootState) => state.profile);
+
     return (
         <SafeAreaView style={{flex: 1, backgroundColor: 'red'}}>
             <View style={{flex: 1, backgroundColor: 'blue', justifyContent: 'center', alignItems: 'center'}}>
@@ -15,6 +17,7 @@ export default function Login(){
                     {editProfile.toString()}
                 </Text>
             </View>
+            <AuthGoogleComponent/>
         </SafeAreaView>
     )
 }
