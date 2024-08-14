@@ -10,6 +10,7 @@ export default function Home(){
     const [mensagem, setMensagem] = useState('');
     const [listaDeMensagens, setListaDeMensagens] = useState([]);
     const { editProfile } = useSelector((state: RootState) => state.profile);
+    const { user } = useSelector((state: RootState) => state.user);
 
     const handleInserts = (payload) => {
         console.log('Change received!', payload)
@@ -32,6 +33,12 @@ export default function Home(){
             <View style={{flex: 1, backgroundColor: 'purple', justifyContent: 'center', alignItems: 'center'}}>
                 <Text style={{color: '#000'}}>
                     Home
+                </Text>
+                <Text style={{color: '#000'}}>
+                    NAME: {user?.name}
+                </Text>
+                <Text style={{color: '#000'}}>
+                    FULL NAME: {user?.full_name}
                 </Text>
                 <Text style={{color: '#000'}}>
                     {editProfile.toString()}
