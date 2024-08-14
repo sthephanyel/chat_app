@@ -18,6 +18,7 @@ import { supabaseClient } from '../../lib/libSupabase';
             try {
             await GoogleSignin.hasPlayServices()
             const userInfo = await GoogleSignin.signIn()
+            console.log('userInfo', userInfo)
             if (userInfo.idToken) {
                 const { data, error } = await supabaseClient.auth.signInWithIdToken({
                 provider: 'google',
