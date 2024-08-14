@@ -6,6 +6,7 @@ import { RootState } from "../../redux/store";
 import { AuthGoogleComponent } from "../../components/auth";
 import { Session } from '@supabase/supabase-js'
 import { supabaseClient } from "../../lib/libSupabase";
+import Auth from '../../components/authInputLogin';
 
 export default function Login(){
     const { editProfile } = useSelector((state: RootState) => state.profile);
@@ -35,6 +36,7 @@ export default function Login(){
                 </Text>
             <AuthGoogleComponent/>
             </View>
+            {/* <Auth/> */}
         </SafeAreaView>
     )
 }

@@ -24,6 +24,7 @@ import { supabaseClient } from '../../lib/libSupabase';
                 provider: 'google',
                 token: userInfo.idToken,
                 })
+                console.log('ERROR')
                 console.log(error, data)
             } else {
                 throw new Error('no ID token present!')
