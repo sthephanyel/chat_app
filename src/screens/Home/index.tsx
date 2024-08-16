@@ -68,9 +68,8 @@ export default function Home(){
     }
 
     async function handleNovaMensagem(novaMensagem: String) {
-        console.log('entrando aqui')
         const mensagem = {
-          de: 'teste',
+          de: user.full_name,
           message: novaMensagem,
         };
     
