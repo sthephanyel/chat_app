@@ -12,7 +12,7 @@ export function AuthGoogleComponent(){
 
     GoogleSignin.configure({
     scopes: ['https://www.googleapis.com/auth/drive.readonly'],
-    webClientId: `${process.env.CLIENTE_WEB}`,
+    webClientId: `${process.env.GOOGLE_CLIENT_ID}`,
     })
     return(
     <GoogleSigninButton
