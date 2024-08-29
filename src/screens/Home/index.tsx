@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { SafeAreaView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { SafeAreaView, Text, TextInput, TouchableOpacity, View, Appearance, Image } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
 import { editprofileUp } from "../../redux/reducers/Profile";
 import { supabaseClient } from "../../lib/libSupabase";
+import { ActivityIndicator, MD2Colors, useTheme } from "react-native-paper";
 
 interface realtimeReturn {
     commit_timestamp: String;
@@ -29,6 +30,7 @@ export interface messageState {
 
 export default function Home(){
     const dispatch = useDispatch();
+    const theme = useTheme();
     const [mensagem, setMensagem] = useState('');
     const [listaDeMensagens, setListaDeMensagens] = useState<messageState[]>([]);
     const { editProfile } = useSelector((state: RootState) => state.profile);
@@ -67,6 +69,19 @@ export default function Home(){
           });
     }
 
+    const getUser = async () =>{
+        
+        let { data: users, error } = await supabaseClient
+        .from('users')
+        .select('*')
+        .eq('email', 'teste@gmail.com')
+
+        if(users?.length > 0 && users != undefined){
+            console.log('users',users)
+        }
+        console.log('error', error)
+    }
+
     async function handleNovaMensagem(novaMensagem: String) {
         const mensagem = {
           de: user.full_name,
@@ -90,13 +105,14 @@ export default function Home(){
       };
 
     useEffect(()=>{
-        getMessage();
-        getRealtime();
+        // getMessage();
+        // getRealtime();
+        // getUser()
       },[]);
 
     return (
         <SafeAreaView style={{flex: 1, backgroundColor: 'red'}}>
-            <View style={{flex: 1, backgroundColor: 'purple', justifyContent: 'center', alignItems: 'center'}}>
+            <View style={{flex: 1, backgroundColor: theme.colors.onBackground, justifyContent: 'center', alignItems: 'center'}}>
                 <Text style={{color: '#000'}}>
                     Home
                 </Text>
@@ -109,6 +125,20 @@ export default function Home(){
                 <Text style={{color: '#000'}}>
                     {mensagem}
                 </Text>
+
+                <TouchableOpacity
+                    style={{backgroundColor: theme.colors.primary, padding:10}}
+                    onPress={()=>{
+                        const themeAtual = Appearance.getColorScheme()
+                        Appearance.setColorScheme(themeAtual === 'dark' ? 'light' : 'dark')
+
+                    }}
+                >
+                    <Text style={{color: '#000'}}>
+                        THEMA
+                    </Text>
+                </TouchableOpacity>
+
                 <TextInput
                     style={{ width: '90%',backgroundColor: 'gray', padding: 5, borderRadius: 10}}
                     placeholder="Escreva aqui"
@@ -126,6 +156,20 @@ export default function Home(){
                         Enviar mensagem
                     </Text>
                 </TouchableOpacity>
+                <Image
+                    width={80}
+                    height={80}
+                    source={{
+                        uri: user.picture
+                      }}
+                />
+                <Image
+                    width={80}
+                    height={80}
+                    source={{
+                        uri: user.avatar_url
+                      }}
+                />
                 {listaDeMensagens.map((item, index)=>{
                     return(
                         <View key={index}>

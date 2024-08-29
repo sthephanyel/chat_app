@@ -4,14 +4,27 @@ GoogleSigninButton,
 statusCodes,
 } from '@react-native-google-signin/google-signin'
 import { supabaseClient } from '../../lib/libSupabase';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { saveUserGoogle } from '../../redux/reducers/User';
 import { useState } from 'react';
 import { ActivityIndicator } from 'react-native';
+import { RootState } from '../../redux/store';
+
+export interface userSupabase {
+    id: Number;
+    created_at: String;
+    description: String | null;
+    email: String | null;
+    full_name: String | null;
+    photo: String | null;
+    name: String | null;
+    updated_at: String | null;
+}
 
 export function AuthGoogleComponent(){
     const dispatch = useDispatch();
     const [loading, setLoading] = useState(false)
+    const { user } = useSelector((state: RootState) => state.user);
 
     GoogleSignin.configure({
     scopes: ['https://www.googleapis.com/auth/drive.readonly'],
@@ -36,7 +49,38 @@ export function AuthGoogleComponent(){
                             token: userInfo.idToken,
                             })
                             // console.log(error, data)
-                            if(data?.session?.access_token){
+                            if(data?.session?.access_token && data?.user?.email){
+                                let { data: current_users, error } = await supabaseClient
+                                .from('users')
+                                .select('*')
+                                .eq('email', data?.user?.email || "")
+
+                                if(current_users?.length > 0 && current_users != undefined){
+                                    console.log('users','Usuário ja existe!', current_users.full_name)
+
+                                    var timestemp = new Date();
+                                    
+                                    const { data: updateUser, error } = await supabaseClient
+                                    .from('users')
+                                    .update({ updated_at : timestemp })
+                                    .eq('email', data?.user?.email || "")
+                                    .select()
+
+                                }else{
+                                    // adiciona o usuario a coluna users
+                                    const { data: userInsert, error } = await supabaseClient
+                                    .from('users')
+                                    .insert([
+                                    { 
+                                        full_name: data?.user?.user_metadata?.full_name || "", 
+                                        name: data?.user?.user_metadata?.name || "",
+                                        email: data?.user?.email || "",
+                                        photo: data?.user?.user_metadata?.picture || ""
+                                     },
+                                    ])
+                                    .select()
+        
+                                }
                                 dispatch(
                                     saveUserGoogle({
                                         access_token: data?.session?.access_token || "",
@@ -51,6 +95,7 @@ export function AuthGoogleComponent(){
                                         picture: data?.user?.user_metadata?.picture || ""
                                     })
                                 );
+                                
                             }
                         } else {
                             throw new Error('no ID token present!')

@@ -1,23 +1,28 @@
 import React from 'react';
 import { Routes } from './src/routes';
-import { SafeAreaView, StatusBar, StyleSheet } from 'react-native';
+import { SafeAreaView, StatusBar, StyleSheet, useColorScheme } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { LibReduxProvider } from './src/lib/libReduxProvider';
 import { LibReduxPersister } from './src/lib/libReduxPersister';
+import { DefaultTheme, PaperProvider } from 'react-native-paper';
+import { darkTheme, lightTheme } from './src/theme';
 
 function App(): React.JSX.Element {
+  const scheme = useColorScheme();
 
   return (
     <LibReduxProvider>
-      <NavigationContainer>
-        <LibReduxPersister>
-          <StatusBar
-            // barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-            backgroundColor={'#000'}
-          />
-          <Routes/>
-        </LibReduxPersister>
-      </NavigationContainer>
+      <PaperProvider theme={scheme === 'dark' ? darkTheme : lightTheme}>
+        <NavigationContainer>
+          <LibReduxPersister>
+            <StatusBar
+              // barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+              backgroundColor={'#000'}
+            />
+            <Routes/>
+          </LibReduxPersister>
+        </NavigationContainer>
+      </PaperProvider>
     </LibReduxProvider>
   );
 }
