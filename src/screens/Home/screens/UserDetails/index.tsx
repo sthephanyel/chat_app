@@ -2,7 +2,9 @@ import React, { useEffect, useState } from "react";
 import { SafeAreaView, Text, TextInput, TouchableOpacity, View, Appearance, Image } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { ActivityIndicator, MD2Colors, useTheme } from "react-native-paper";
-import { RootState } from "../../../../redux/store";
+import { RootState } from "@redux/store";
+// import { RootState } from "../../../../redux/store";
+
 
 
 export default function UserDetails(){
