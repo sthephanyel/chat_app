@@ -12,6 +12,7 @@ export interface UserState {
     full_name: string;
     name: string;
     picture: string;
+    description: string;
   }
 }
 
@@ -26,7 +27,8 @@ const initialState: UserState = {
     avatar_url: "",
     full_name: "",
     name: "",
-    picture: ""
+    picture: "",
+    description: "",
   }
 }
 const userSlice = createSlice({

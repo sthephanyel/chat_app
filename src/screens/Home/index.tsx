@@ -5,6 +5,7 @@ import { RootState } from "../../redux/store";
 import { editprofileUp } from "../../redux/reducers/Profile";
 import { supabaseClient } from "../../lib/libSupabase";
 import { ActivityIndicator, MD2Colors, useTheme } from "react-native-paper";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 interface realtimeReturn {
     commit_timestamp: String;
@@ -28,7 +29,11 @@ export interface messageState {
     message: String;
   }
 
-export default function Home(){
+interface HomeProps {
+navigation: NativeStackNavigationProp<any, "home">;
+}
+
+export default function Home({navigation}: HomeProps){
     const dispatch = useDispatch();
     const theme = useTheme();
     const [mensagem, setMensagem] = useState('');
@@ -170,6 +175,16 @@ export default function Home(){
                         uri: user.avatar_url
                       }}
                 />
+                <TouchableOpacity
+                    style={{backgroundColor: 'blue', padding:10}}
+                    onPress={()=>{
+                        navigation.navigate('chat')
+                    }}
+                >
+                    <Text style={{color: '#000'}}>
+                        Ir para o Chat
+                    </Text>
+                </TouchableOpacity>
                 {listaDeMensagens.map((item, index)=>{
                     return(
                         <View key={index}>

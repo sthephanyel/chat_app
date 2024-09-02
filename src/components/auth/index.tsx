@@ -50,13 +50,28 @@ export function AuthGoogleComponent(){
                             })
                             // console.log(error, data)
                             if(data?.session?.access_token && data?.user?.email){
+                                const dataResp = {
+                                    access_token: data?.session?.access_token || "",
+                                    created_at: data?.session?.access_token || "",
+                                    confirmed_at: data?.user?.confirmed_at || "",
+                                    email: data?.user?.email || "",
+                                    email_confirmed_at: data?.user?.email_confirmed_at || "",
+                                    updated_at: data?.user?.updated_at || "",
+                                    avatar_url: data?.user?.user_metadata?.avatar_url || "",
+                                    full_name: data?.user?.user_metadata?.full_name || "",
+                                    name: data?.user?.user_metadata?.name || "",
+                                    picture: data?.user?.user_metadata?.picture || "",
+                                    description: ""
+                                }
+                                
                                 let { data: current_users, error } = await supabaseClient
                                 .from('users')
                                 .select('*')
                                 .eq('email', data?.user?.email || "")
+                                console.log('current_users', JSON.stringify(current_users, null, 2))
 
                                 if(current_users?.length > 0 && current_users != undefined){
-                                    console.log('users','Usuário ja existe!', current_users.full_name)
+                                    console.log('users','Usuário ja existe!', current_users[0].full_name)
 
                                     var timestemp = new Date();
                                     
@@ -65,10 +80,19 @@ export function AuthGoogleComponent(){
                                     .update({ updated_at : timestemp })
                                     .eq('email', data?.user?.email || "")
                                     .select()
+                                    if(updateUser != undefined){
+                                        dataResp.full_name = updateUser[0].full_name || ""
+                                        dataResp.created_at = updateUser[0].created_at || ""
+                                        dataResp.name = updateUser[0].name || ""
+                                        dataResp.avatar_url = updateUser[0].photo || ""
+                                        dataResp.description = updateUser[0].description || ""
+                                        dataResp.email = updateUser[0].email || ""
+                                        dataResp.updated_at = updateUser[0].updated_at || ""
+                                    }
 
                                 }else{
                                     // adiciona o usuario a coluna users
-                                    const { data: userInsert, error } = await supabaseClient
+                                    const { data: user_insert, error } = await supabaseClient
                                     .from('users')
                                     .insert([
                                     { 
@@ -79,21 +103,21 @@ export function AuthGoogleComponent(){
                                      },
                                     ])
                                     .select()
-        
+                                    if(user_insert != undefined){
+                                        console.log('user_insert', JSON.stringify(user_insert, null, 2))
+                                        dataResp.full_name = user_insert[0].full_name || ""
+                                        dataResp.created_at = user_insert[0].created_at || ""
+                                        dataResp.name = user_insert[0].name || ""
+                                        dataResp.avatar_url = user_insert[0].photo || ""
+                                        dataResp.description = user_insert[0].description || ""
+                                        dataResp.email = user_insert[0].email || ""
+                                        dataResp.updated_at = user_insert[0].updated_at || ""
+                                    }
+                                    
                                 }
+
                                 dispatch(
-                                    saveUserGoogle({
-                                        access_token: data?.session?.access_token || "",
-                                        created_at: data?.session?.access_token || "",
-                                        confirmed_at: data?.user?.confirmed_at || "",
-                                        email: data?.user?.email || "",
-                                        email_confirmed_at: data?.user?.email_confirmed_at || "",
-                                        updated_at: data?.user?.updated_at || "",
-                                        avatar_url: data?.user?.user_metadata?.avatar_url || "",
-                                        full_name: data?.user?.user_metadata?.full_name || "",
-                                        name: data?.user?.user_metadata?.name || "",
-                                        picture: data?.user?.user_metadata?.picture || ""
-                                    })
+                                    saveUserGoogle(dataResp)
                                 );
                                 
                             }
