@@ -2,6 +2,7 @@ import {createSlice} from '@reduxjs/toolkit';
 
 export interface UserState {
   user: {
+    id: number | null;
     access_token: string;
     created_at: string;
     confirmed_at: string;
@@ -18,6 +19,7 @@ export interface UserState {
 
 const initialState: UserState = {
   user: {
+    id: null,
     access_token: "",
     created_at: "",
     confirmed_at: "",

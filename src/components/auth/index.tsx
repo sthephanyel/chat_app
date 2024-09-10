@@ -1,3 +1,4 @@
+import React from 'react'
 import {
 GoogleSignin,
 GoogleSigninButton,
@@ -51,6 +52,7 @@ export function AuthGoogleComponent(){
                             // console.log(error, data)
                             if(data?.session?.access_token && data?.user?.email){
                                 const dataResp = {
+                                    id: null,
                                     access_token: data?.session?.access_token || "",
                                     created_at: data?.session?.access_token || "",
                                     confirmed_at: data?.user?.confirmed_at || "",
@@ -68,11 +70,8 @@ export function AuthGoogleComponent(){
                                 .from('users')
                                 .select('*')
                                 .eq('email', data?.user?.email || "")
-                                console.log('current_users', JSON.stringify(current_users, null, 2))
 
-                                if(current_users?.length > 0 && current_users != undefined){
-                                    console.log('users','Usuário ja existe!', current_users[0].full_name)
-
+                                if(current_users != undefined && current_users?.length > 0){
                                     var timestemp = new Date();
                                     
                                     const { data: updateUser, error } = await supabaseClient
@@ -80,7 +79,9 @@ export function AuthGoogleComponent(){
                                     .update({ updated_at : timestemp })
                                     .eq('email', data?.user?.email || "")
                                     .select()
+                                    // console.log('updateUser', JSON.stringify(updateUser, null, 2))
                                     if(updateUser != undefined){
+                                        dataResp.id = updateUser[0].id || null
                                         dataResp.full_name = updateUser[0].full_name || ""
                                         dataResp.created_at = updateUser[0].created_at || ""
                                         dataResp.name = updateUser[0].name || ""
@@ -103,8 +104,10 @@ export function AuthGoogleComponent(){
                                      },
                                     ])
                                     .select()
+                                    // console.log('updateUser', JSON.stringify(user_insert, null, 2))
+
                                     if(user_insert != undefined){
-                                        console.log('user_insert', JSON.stringify(user_insert, null, 2))
+                                        dataResp.id = user_insert[0].id || null
                                         dataResp.full_name = user_insert[0].full_name || ""
                                         dataResp.created_at = user_insert[0].created_at || ""
                                         dataResp.name = user_insert[0].name || ""

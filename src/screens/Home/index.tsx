@@ -81,7 +81,7 @@ export default function Home({navigation}: HomeProps){
         .select('*')
         .eq('email', 'teste@gmail.com')
 
-        if(users?.length > 0 && users != undefined){
+        if(users != undefined && users?.length > 0){
             console.log('users',users)
         }
         console.log('error', error)
@@ -91,6 +91,7 @@ export default function Home({navigation}: HomeProps){
         const mensagem = {
           de: user.full_name,
           message: novaMensagem,
+          user_id: user?.id 
         };
     
         const { error, status } = await supabaseClient
@@ -110,7 +111,7 @@ export default function Home({navigation}: HomeProps){
       };
 
     useEffect(()=>{
-        // getMessage();
+        getMessage();
         // getRealtime();
         // getUser()
       },[]);
@@ -120,6 +121,9 @@ export default function Home({navigation}: HomeProps){
             <View style={{flex: 1, backgroundColor: theme.colors.onBackground, justifyContent: 'center', alignItems: 'center'}}>
                 <Text style={{color: '#000'}}>
                     Home
+                </Text>
+                <Text style={{color: '#000'}}>
+                    ID: {user?.id}
                 </Text>
                 <Text style={{color: '#000'}}>
                     NAME: {user?.name}
