@@ -11,6 +11,7 @@
       "@lib/*": ["src/lib/*"],
       "@routes/*": ["src/routes/*"],
       "@theme/*": ["src/theme/*"],
+      "@assets/*": ["src/assets/*"],
     }
   },
 }

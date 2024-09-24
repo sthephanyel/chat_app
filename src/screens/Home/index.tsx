@@ -6,6 +6,7 @@ import { editprofileUp } from "../../redux/reducers/Profile";
 import { supabaseClient } from "../../lib/libSupabase";
 import { ActivityIndicator, MD2Colors, useTheme } from "react-native-paper";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withSpring, withTiming } from "react-native-reanimated";
 
 interface realtimeReturn {
     commit_timestamp: String;
@@ -111,10 +112,39 @@ export default function Home({navigation}: HomeProps){
       };
 
     useEffect(()=>{
-        getMessage();
+        // getMessage();
         // getRealtime();
         // getUser()
       },[]);
+      const op = useSharedValue(0);
+      const sv = useSharedValue(0);
+      sv.value = withRepeat(withTiming(100, { duration: 800 }, 
+        (finished, currentValue) => {
+        if (finished) {
+          console.log('current withRepeat value is ' + currentValue);
+        }
+        if(currentValue == 0){
+            op.value = withTiming(1, { duration: 10 });
+        }
+        if(currentValue == 100){
+            op.value = withTiming(0);
+        }
+      }), 
+      -1, 
+      true);
+
+      const animatedStyles = useAnimatedStyle(() => {
+        return {
+            opacity: withSpring(op.value, { duration: 500 }),
+            width: sv.value,
+            height: sv.value
+        //   transform: [
+        //     {
+        //       rotate: `${sv.value}deg`,
+        //     },
+        //   ],
+        };
+      });
 
     return (
         <SafeAreaView style={{flex: 1, backgroundColor: 'red'}}>
@@ -172,13 +202,26 @@ export default function Home({navigation}: HomeProps){
                         uri: user.picture
                       }}
                 />
-                <Image
-                    width={80}
-                    height={80}
-                    source={{
-                        uri: user.avatar_url
-                      }}
-                />
+                <Animated.View 
+                    style={[
+                        animatedStyles,
+                    {
+                        width: 80,
+                        height: 80,
+                        backgroundColor: 'green', 
+                        padding: 10,
+                        borderRadius: 100
+                    },
+                    ]}
+                >
+                    {/* <Image
+                        width={80}
+                        height={80}
+                        source={{
+                            uri: user.avatar_url
+                        }}
+                    /> */}
+                </Animated.View>
                 <TouchableOpacity
                     style={{backgroundColor: 'blue', padding:10}}
                     onPress={()=>{
