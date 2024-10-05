@@ -58,9 +58,15 @@ export default function Chat({navigation}: ChatProps) {
 
   const handleInserts = (payload: realtimeReturn) => {
     // console.log('Change received!', payload);
-    setListaDeMensagens(valorAtualDaLista => {
-      return [...valorAtualDaLista, payload.new];
-    });
+    if (
+      (payload?.new?.receiverid == 2 || payload?.new?.receiverid == user?.id) &&
+      (payload?.new?.senderid == user?.id || payload?.new?.senderid == 2)
+    ) {
+      // console.log('incrementou');
+      setListaDeMensagens(valorAtualDaLista => {
+        return [...valorAtualDaLista, payload.new];
+      });
+    }
   };
 
   const getRealtime = async () => {
@@ -73,8 +79,7 @@ export default function Chat({navigation}: ChatProps) {
           schema: 'public',
           table: 'messages',
           // filters: 'senderid.eq.2,senderid.eq.5',
-          filters:
-            'senderid=in.2,senderid=in.5,receiverid=in.2,receiverid=in.5',
+          filters: `senderid=in.(${user?.id}, 2),receiverid=in.(${user?.id}, 2)`,
         },
         handleInserts,
       )
@@ -92,8 +97,8 @@ export default function Chat({navigation}: ChatProps) {
     await supabaseClient
       .from('messages')
       .select('*')
-      .in('senderid', ['5', '2'])
-      .in('receiverid', ['5', '2'])
+      .in('senderid', [user?.id, '2'])
+      .in('receiverid', [user?.id, '2'])
       .order('messageid', {ascending: true})
       .then(({data}: any) => {
         // console.log('data', data);
