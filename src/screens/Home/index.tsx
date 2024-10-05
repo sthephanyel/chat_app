@@ -1,245 +1,194 @@
-import React, { useEffect, useState } from "react";
-import { SafeAreaView, Text, TextInput, TouchableOpacity, View, Appearance, Image } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../redux/store";
-import { editprofileUp } from "../../redux/reducers/Profile";
-import { supabaseClient } from "../../lib/libSupabase";
-import { ActivityIndicator, MD2Colors, useTheme } from "react-native-paper";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withSpring, withTiming } from "react-native-reanimated";
+import React, {useEffect, useState} from 'react';
+import {
+  SafeAreaView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  Appearance,
+  Image,
+} from 'react-native';
+import {useDispatch, useSelector} from 'react-redux';
+import {RootState} from '../../redux/store';
+import {editprofileUp} from '../../redux/reducers/Profile';
+import {supabaseClient} from '../../lib/libSupabase';
+import {ActivityIndicator, MD2Colors, useTheme} from 'react-native-paper';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 
 interface realtimeReturn {
-    commit_timestamp: String;
-    errors: String;
-    eventType: String; 
-    new: {
-        created_at: String;
-        de: String;
-        id: Number;
-        message: String;
-    }, 
-    old: {}, 
-    schema: String;
-    table: String;
-}
-
-export interface messageState {
+  commit_timestamp: String;
+  errors: String;
+  eventType: String;
+  new: {
     created_at: String;
     de: String;
     id: Number;
     message: String;
-  }
-
-interface HomeProps {
-navigation: NativeStackNavigationProp<any, "home">;
+  };
+  old: {};
+  schema: String;
+  table: String;
 }
 
-export default function Home({navigation}: HomeProps){
-    const dispatch = useDispatch();
-    const theme = useTheme();
-    const [mensagem, setMensagem] = useState('');
-    const [listaDeMensagens, setListaDeMensagens] = useState<messageState[]>([]);
-    const { editProfile } = useSelector((state: RootState) => state.profile);
-    const { user } = useSelector((state: RootState) => state.user);
+export interface messageState {
+  created_at: String;
+  de: String;
+  id: Number;
+  message: String;
+}
 
-    const handleInserts = (payload:realtimeReturn) => {
-        // console.log('Change received!', payload)
-        setListaDeMensagens((valorAtualDaLista)=>{
-            return [
-                payload.new,
-                ...valorAtualDaLista,
-            ]
-        });
-      }
-    
-      const getRealtime = async () => {
-        await supabaseClient.channel('livingmessage')
-            .on(
-                'postgres_changes', 
-                { event: 'INSERT', 
-                    schema: 'public', 
-                    table: 'livingmessage' 
-                }, handleInserts)
-            .subscribe()
-      }
-    
+interface HomeProps {
+  navigation: NativeStackNavigationProp<any, 'home'>;
+}
 
-    const getMessage = async () =>{
-        await supabaseClient
-          .from('livingmessage')
-          .select('*')
-          .order('id',{ascending: false})
-          .then(({data}: any)=>{
-            // console.log('data atual', data)
-            setListaDeMensagens(data);
-          });
-    }
+export default function Home({navigation}: HomeProps) {
+  const dispatch = useDispatch();
+  const theme = useTheme();
+  const [mensagem, setMensagem] = useState('');
+  const [listaDeMensagens, setListaDeMensagens] = useState<messageState[]>([]);
+  const {editProfile} = useSelector((state: RootState) => state.profile);
+  const {user} = useSelector((state: RootState) => state.user);
 
-    const getUser = async () =>{
-        
-        let { data: users, error } = await supabaseClient
-        .from('users')
-        .select('*')
-        .eq('email', 'teste@gmail.com')
+  const handleInserts = (payload: realtimeReturn) => {
+    // console.log('Change received!', payload)
+    setListaDeMensagens(valorAtualDaLista => {
+      return [payload.new, ...valorAtualDaLista];
+    });
+  };
 
-        if(users != undefined && users?.length > 0){
-            console.log('users',users)
-        }
-        console.log('error', error)
-    }
+  const getRealtime = async () => {
+    await supabaseClient
+      .channel('livingmessage')
+      .on(
+        'postgres_changes',
+        {event: 'INSERT', schema: 'public', table: 'livingmessage'},
+        handleInserts,
+      )
+      .subscribe();
+  };
 
-    async function handleNovaMensagem(novaMensagem: String) {
-        const mensagem = {
-          de: user.full_name,
-          message: novaMensagem,
-          user_id: user?.id 
-        };
-    
-        const { error, status } = await supabaseClient
-          .from('livingmessage')
-          .insert([
-            mensagem
-        ])
-
-          if(status == 201){
-            console.log('Deu certo')
-          }
-          if(error != null){
-            console.log('Deu errado')
-          }
-
-        setMensagem('');
-      };
-
-    useEffect(()=>{
-        // getMessage();
-        // getRealtime();
-        // getUser()
-      },[]);
-      const op = useSharedValue(0);
-      const sv = useSharedValue(0);
-      sv.value = withRepeat(withTiming(100, { duration: 800 }, 
-        (finished, currentValue) => {
-        if (finished) {
-          console.log('current withRepeat value is ' + currentValue);
-        }
-        if(currentValue == 0){
-            op.value = withTiming(1, { duration: 10 });
-        }
-        if(currentValue == 100){
-            op.value = withTiming(0);
-        }
-      }), 
-      -1, 
-      true);
-
-      const animatedStyles = useAnimatedStyle(() => {
-        return {
-            opacity: withSpring(op.value, { duration: 500 }),
-            width: sv.value,
-            height: sv.value
-        //   transform: [
-        //     {
-        //       rotate: `${sv.value}deg`,
-        //     },
-        //   ],
-        };
+  const getMessage = async () => {
+    await supabaseClient
+      .from('livingmessage')
+      .select('*')
+      .order('id', {ascending: false})
+      .then(({data}: any) => {
+        // console.log('data atual', data)
+        setListaDeMensagens(data);
       });
+  };
 
-    return (
-        <SafeAreaView style={{flex: 1, backgroundColor: 'red'}}>
-            <View style={{flex: 1, backgroundColor: theme.colors.onBackground, justifyContent: 'center', alignItems: 'center'}}>
-                <Text style={{color: '#000'}}>
-                    Home
-                </Text>
-                <Text style={{color: '#000'}}>
-                    ID: {user?.id}
-                </Text>
-                <Text style={{color: '#000'}}>
-                    NAME: {user?.name}
-                </Text>
-                <Text style={{color: '#000'}}>
-                    FULL NAME: {user?.full_name}
-                </Text>
-                <Text style={{color: '#000'}}>
-                    {mensagem}
-                </Text>
+  const getUser = async () => {
+    let {data: users, error} = await supabaseClient
+      .from('users')
+      .select('*')
+      .eq('email', 'teste@gmail.com');
 
-                <TouchableOpacity
-                    style={{backgroundColor: theme.colors.primary, padding:10}}
-                    onPress={()=>{
-                        const themeAtual = Appearance.getColorScheme()
-                        Appearance.setColorScheme(themeAtual === 'dark' ? 'light' : 'dark')
+    if (users != undefined && users?.length > 0) {
+      console.log('users', users);
+    }
+    console.log('error', error);
+  };
 
-                    }}
-                >
-                    <Text style={{color: '#000'}}>
-                        THEMA
-                    </Text>
-                </TouchableOpacity>
+  async function handleNovaMensagem(novaMensagem: String) {
+    const mensagem = {
+      de: user.full_name,
+      message: novaMensagem,
+      user_id: user?.id,
+    };
 
-                <TextInput
-                    style={{ width: '90%',backgroundColor: 'gray', padding: 5, borderRadius: 10}}
-                    placeholder="Escreva aqui"
-                    onChangeText={setMensagem}
-                    value={mensagem}
-                />
-                <TouchableOpacity
-                    style={{backgroundColor: 'blue', padding:10}}
-                    onPress={()=>{
-                        // dispatch(editprofileUp(!editProfile))
-                        handleNovaMensagem(mensagem)
-                    }}
-                >
-                    <Text style={{color: '#000'}}>
-                        Enviar mensagem
-                    </Text>
-                </TouchableOpacity>
-                <Image
-                    width={80}
-                    height={80}
-                    source={{
-                        uri: user.picture
-                      }}
-                />
-                <Animated.View 
-                    style={[
-                        animatedStyles,
-                    {
-                        width: 80,
-                        height: 80,
-                        backgroundColor: 'green', 
-                        padding: 10,
-                        borderRadius: 100
-                    },
-                    ]}
-                >
-                    {/* <Image
-                        width={80}
-                        height={80}
-                        source={{
-                            uri: user.avatar_url
-                        }}
-                    /> */}
-                </Animated.View>
-                <TouchableOpacity
-                    style={{backgroundColor: 'blue', padding:10}}
-                    onPress={()=>{
-                        navigation.navigate('chat')
-                    }}
-                >
-                    <Text style={{color: '#000'}}>
-                        Ir para o Chat
-                    </Text>
-                </TouchableOpacity>
-                {listaDeMensagens.map((item, index)=>{
-                    return(
-                        <View key={index}>
-                            <Text>{item?.message}</Text>
-                        </View>
-                    )
-                })}
+    const {error, status} = await supabaseClient
+      .from('livingmessage')
+      .insert([mensagem]);
+
+    if (status == 201) {
+      console.log('Deu certo');
+    }
+    if (error != null) {
+      console.log('Deu errado');
+    }
+
+    setMensagem('');
+  }
+
+  useEffect(() => {
+    // getMessage();
+    // getRealtime();
+    // getUser()
+  }, []);
+
+  return (
+    <SafeAreaView style={{flex: 1}}>
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: theme.colors.background,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}>
+        <Text style={{color: '#fff'}}>Home</Text>
+        <Text style={{color: '#fff'}}>ID: {user?.id}</Text>
+        <Text style={{color: '#fff'}}>NAME: {user?.name}</Text>
+        <Text style={{color: '#fff'}}>FULL NAME: {user?.full_name}</Text>
+        <Text style={{color: '#fff'}}>{mensagem}</Text>
+
+        <TouchableOpacity
+          style={{backgroundColor: theme.colors.primary, padding: 10}}
+          onPress={() => {
+            const themeAtual = Appearance.getColorScheme();
+            Appearance.setColorScheme(themeAtual === 'dark' ? 'light' : 'dark');
+          }}>
+          <Text style={{color: '#000'}}>THEMA</Text>
+        </TouchableOpacity>
+
+        <TextInput
+          style={{
+            width: '90%',
+            backgroundColor: 'gray',
+            padding: 5,
+            borderRadius: 10,
+          }}
+          placeholder="Escreva aqui"
+          onChangeText={setMensagem}
+          value={mensagem}
+        />
+        <TouchableOpacity
+          style={{backgroundColor: 'blue', padding: 10}}
+          onPress={() => {
+            // dispatch(editprofileUp(!editProfile))
+            handleNovaMensagem(mensagem);
+          }}>
+          <Text style={{color: '#000'}}>Enviar mensagem</Text>
+        </TouchableOpacity>
+        <Image
+          width={80}
+          height={80}
+          source={{
+            uri: user.picture,
+          }}
+        />
+        <TouchableOpacity
+          style={{backgroundColor: 'blue', padding: 10}}
+          onPress={() => {
+            navigation.navigate('chat');
+          }}>
+          <Text style={{color: '#000'}}>Ir para o Chat</Text>
+        </TouchableOpacity>
+        {listaDeMensagens.map((item, index) => {
+          return (
+            <View key={index}>
+              <Text>{item?.message}</Text>
             </View>
-        </SafeAreaView>
-    )
+          );
+        })}
+      </View>
+    </SafeAreaView>
+  );
 }

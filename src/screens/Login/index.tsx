@@ -101,7 +101,6 @@ export default function Login() {
         colors={[theme.colors.background, '#0B2985']}
         style={{
           flex: 1,
-          //   backgroundColor: theme.colors.background,
           justifyContent: 'center',
           alignItems: 'center',
         }}>

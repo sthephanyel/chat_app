@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, {useEffect, useRef} from 'react';
 import {
   Dimensions,
   Platform,
@@ -6,19 +6,19 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from "react-native";
+} from 'react-native';
 
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { HomeRoutes } from "./home.routes";
-import Posts from "../screens/Posts";
-import Contacts from "../screens/Contacts";
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {HomeRoutes} from './home.routes';
+import Posts from '../screens/Posts';
+import Contacts from '../screens/Contacts';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
-const TabButton = (props) => {
-  const { item, onPress, accessibilityState } = props;
+const TabButton = props => {
+  const {item, onPress, accessibilityState} = props;
   const focused = accessibilityState.selected;
 
   return (
@@ -26,53 +26,54 @@ const TabButton = (props) => {
       onPress={onPress}
       style={{
         flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: 'red'
-      }}
-    >
-      <View 
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'red',
+      }}>
+      <View
         style={{
-          width: 60, 
-          height: 60, 
-          justifyContent: "center", 
-          alignItems: "center",
+          width: 60,
+          height: 60,
+          justifyContent: 'center',
+          alignItems: 'center',
           // marginBottom: 20
         }}>
-        <Text style={{color: '#000',  fontSize: focused ? 15 : 10, textAlign: "center"}}>
+        <Text
+          style={{
+            color: '#000',
+            fontSize: focused ? 15 : 10,
+            textAlign: 'center',
+          }}>
           {item}
         </Text>
       </View>
     </TouchableOpacity>
-  )
-}
+  );
+};
 
 export function AppTabBar() {
-
   return (
-    <Tab.Navigator
-      initialRouteName="homeNavigator"
-    >
+    <Tab.Navigator initialRouteName="homeNavigator">
       <Tab.Screen
         name="homeNavigator"
         component={HomeRoutes}
         options={{
           headerShown: false,
-          tabBarButton: (props) => <TabButton {...props} item={"home"} />,
+          tabBarButton: props => <TabButton {...props} item={'home'} />,
         }}
       />
       <Tab.Screen
         name="posts"
         component={Posts}
         options={{
-          headerShown: false
+          headerShown: false,
         }}
       />
       <Tab.Screen
         name="contacts"
         component={Contacts}
         options={{
-          headerShown: false
+          headerShown: false,
         }}
       />
     </Tab.Navigator>
