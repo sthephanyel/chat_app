@@ -24,9 +24,9 @@ export default function Login() {
   const sv = useSharedValue(0);
   sv.value = withRepeat(
     withTiming(100, {duration: 800}, (finished, currentValue) => {
-      if (finished) {
-        console.log('current withRepeat value is ' + currentValue);
-      }
+      // if (finished) {
+      //   console.log('current withRepeat value is ' + currentValue);
+      // }
       if (currentValue == 0) {
         op.value = withTiming(1, {duration: 10});
       }

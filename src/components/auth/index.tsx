@@ -73,6 +73,7 @@ export function AuthGoogleComponent({...props}) {
                     .eq('email', data?.user?.email || '');
 
                   if (current_users != undefined && current_users?.length > 0) {
+                    // ATUALIZA AS INFORMAÇÕES DO USUÁRIO
                     var timestemp = new Date();
 
                     const {data: updateUser, error} = await supabaseClient

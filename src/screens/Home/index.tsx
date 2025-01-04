@@ -7,42 +7,15 @@ import {
   View,
   Appearance,
   Image,
+  StatusBar,
+  ScrollView,
 } from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import {RootState} from '../../redux/store';
-import {editprofileUp} from '../../redux/reducers/Profile';
 import {supabaseClient} from '../../lib/libSupabase';
-import {ActivityIndicator, MD2Colors, useTheme} from 'react-native-paper';
+import {useTheme} from 'react-native-paper';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withSpring,
-  withTiming,
-} from 'react-native-reanimated';
-
-interface realtimeReturn {
-  commit_timestamp: String;
-  errors: String;
-  eventType: String;
-  new: {
-    created_at: String;
-    de: String;
-    id: Number;
-    message: String;
-  };
-  old: {};
-  schema: String;
-  table: String;
-}
-
-export interface messageState {
-  created_at: String;
-  de: String;
-  id: Number;
-  message: String;
-}
+import IconInfinit from '@assets/SVGs/logo_infinit.svg';
 
 interface HomeProps {
   navigation: NativeStackNavigationProp<any, 'home'>;
@@ -51,39 +24,7 @@ interface HomeProps {
 export default function Home({navigation}: HomeProps) {
   const dispatch = useDispatch();
   const theme = useTheme();
-  const [mensagem, setMensagem] = useState('');
-  const [listaDeMensagens, setListaDeMensagens] = useState<messageState[]>([]);
-  const {editProfile} = useSelector((state: RootState) => state.profile);
   const {user} = useSelector((state: RootState) => state.user);
-
-  const handleInserts = (payload: realtimeReturn) => {
-    // console.log('Change received!', payload)
-    setListaDeMensagens(valorAtualDaLista => {
-      return [payload.new, ...valorAtualDaLista];
-    });
-  };
-
-  const getRealtime = async () => {
-    await supabaseClient
-      .channel('livingmessage')
-      .on(
-        'postgres_changes',
-        {event: 'INSERT', schema: 'public', table: 'livingmessage'},
-        handleInserts,
-      )
-      .subscribe();
-  };
-
-  const getMessage = async () => {
-    await supabaseClient
-      .from('livingmessage')
-      .select('*')
-      .order('id', {ascending: false})
-      .then(({data}: any) => {
-        // console.log('data atual', data)
-        setListaDeMensagens(data);
-      });
-  };
 
   const getUser = async () => {
     let {data: users, error} = await supabaseClient
@@ -97,47 +38,76 @@ export default function Home({navigation}: HomeProps) {
     console.log('error', error);
   };
 
-  async function handleNovaMensagem(novaMensagem: String) {
-    const mensagem = {
-      de: user.full_name,
-      message: novaMensagem,
-      user_id: user?.id,
-    };
+  const getContacts = async () => {
+    let {data, error, status} = await supabaseClient
+      .from('contacts')
+      .select('*')
+      .eq('userid', user.id);
 
-    const {error, status} = await supabaseClient
-      .from('livingmessage')
-      .insert([mensagem]);
-
-    if (status == 201) {
-      console.log('Deu certo');
+    if (data != undefined && data?.length > 0) {
+      console.log('users', data);
     }
-    if (error != null) {
-      console.log('Deu errado');
-    }
-
-    setMensagem('');
-  }
+    console.log('error', error);
+  };
 
   useEffect(() => {
-    // getMessage();
-    // getRealtime();
     // getUser()
+    // getContacts();
   }, []);
 
   return (
     <SafeAreaView style={{flex: 1}}>
+      <StatusBar
+        barStyle={'light-content'}
+        backgroundColor={theme.colors.background}
+      />
       <View
+        style={{
+          flexDirection: 'row',
+          width: '100%',
+          alignItems: 'center',
+          backgroundColor: theme.colors.background,
+          padding: 12,
+        }}>
+        <IconInfinit width={25} height={25} color={theme.colors.background} />
+        <Text
+          style={{
+            color: theme.colors.primary,
+            fontWeight: '800',
+            marginLeft: 3,
+            fontSize: 13,
+          }}>
+          Infinit
+        </Text>
+      </View>
+      <ScrollView
         style={{
           flex: 1,
           backgroundColor: theme.colors.background,
-          justifyContent: 'center',
-          alignItems: 'center',
         }}>
-        <Text style={{color: '#fff'}}>Home</Text>
+        <View
+          style={{
+            flexDirection: 'row',
+            width: '100%',
+            alignItems: 'center',
+            backgroundColor: 'red',
+            padding: 12,
+          }}>
+          <Text
+            style={{
+              color: theme.colors.primary,
+              fontWeight: '800',
+              marginLeft: 3,
+              fontSize: 13,
+            }}>
+            PESQUISAR
+          </Text>
+        </View>
+
+        {/* <Text style={{color: '#fff'}}>Home</Text>
         <Text style={{color: '#fff'}}>ID: {user?.id}</Text>
         <Text style={{color: '#fff'}}>NAME: {user?.name}</Text>
         <Text style={{color: '#fff'}}>FULL NAME: {user?.full_name}</Text>
-        <Text style={{color: '#fff'}}>{mensagem}</Text>
 
         <TouchableOpacity
           style={{backgroundColor: theme.colors.primary, padding: 10}}
@@ -146,26 +116,6 @@ export default function Home({navigation}: HomeProps) {
             Appearance.setColorScheme(themeAtual === 'dark' ? 'light' : 'dark');
           }}>
           <Text style={{color: '#000'}}>THEMA</Text>
-        </TouchableOpacity>
-
-        <TextInput
-          style={{
-            width: '90%',
-            backgroundColor: 'gray',
-            padding: 5,
-            borderRadius: 10,
-          }}
-          placeholder="Escreva aqui"
-          onChangeText={setMensagem}
-          value={mensagem}
-        />
-        <TouchableOpacity
-          style={{backgroundColor: 'blue', padding: 10}}
-          onPress={() => {
-            // dispatch(editprofileUp(!editProfile))
-            handleNovaMensagem(mensagem);
-          }}>
-          <Text style={{color: '#000'}}>Enviar mensagem</Text>
         </TouchableOpacity>
         <Image
           width={80}
@@ -180,15 +130,8 @@ export default function Home({navigation}: HomeProps) {
             navigation.navigate('chat');
           }}>
           <Text style={{color: '#000'}}>Ir para o Chat</Text>
-        </TouchableOpacity>
-        {listaDeMensagens.map((item, index) => {
-          return (
-            <View key={index}>
-              <Text>{item?.message}</Text>
-            </View>
-          );
-        })}
-      </View>
+        </TouchableOpacity> */}
+      </ScrollView>
     </SafeAreaView>
   );
 }
