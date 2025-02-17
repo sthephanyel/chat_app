@@ -13,20 +13,33 @@ import {RootState} from '../../redux/store';
 import IconGoogleSVG from '@assets/SVGs/icon_google.svg';
 
 export interface userSupabase {
-  id: Number;
-  created_at: String;
-  description: String | null;
-  email: String | null;
-  full_name: String | null;
-  photo: String | null;
-  name: String | null;
-  updated_at: String | null;
+  id: number;
+  created_at: string;
+  description: string | null;
+  email: string | null;
+  full_name: string | null;
+  photo: string | null;
+  name: string | null;
+  updated_at: string | null;
+  avatar_url: string | null;
 }
 
 export function AuthGoogleComponent({...props}) {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
-  const {user} = useSelector((state: RootState) => state.user);
+
+  function FiltroObjectJson(data: userSupabase[]) {
+    const jsonReturn: userSupabase = {};
+
+    jsonReturn.id = data[0].id;
+    jsonReturn.full_name = data[0].full_name || '';
+    jsonReturn.created_at = data[0].created_at || '';
+    jsonReturn.name = data[0].name || '';
+    jsonReturn.avatar_url = data[0].photo || '';
+    jsonReturn.description = data[0].description || '';
+    jsonReturn.email = data[0].email || '';
+    jsonReturn.updated_at = data[0].updated_at || '';
+  }
 
   GoogleSignin.configure({
     scopes: ['https://www.googleapis.com/auth/drive.readonly'],
@@ -45,13 +58,13 @@ export function AuthGoogleComponent({...props}) {
               await GoogleSignin.hasPlayServices();
               const userInfo = await GoogleSignin.signIn();
               if (userInfo.idToken) {
-                const {data, error} =
-                  await supabaseClient.auth.signInWithIdToken({
-                    provider: 'google',
-                    token: userInfo.idToken,
-                  });
+                const {data} = await supabaseClient.auth.signInWithIdToken({
+                  provider: 'google',
+                  token: userInfo.idToken,
+                });
                 // console.log(error, data)
                 if (data?.session?.access_token && data?.user?.email) {
+                  // PEGA TODAS AS INFORMAÇÕES RETORNADAS DA SESSION GOOGLE
                   const dataResp = {
                     id: null,
                     access_token: data?.session?.access_token || '',
@@ -67,34 +80,29 @@ export function AuthGoogleComponent({...props}) {
                     description: '',
                   };
 
-                  let {data: current_users, error} = await supabaseClient
+                  // VERIFICA SE O USUÁRIO EXISTE
+                  let {data: current_users} = await supabaseClient
                     .from('users')
                     .select('*')
                     .eq('email', data?.user?.email || '');
 
                   if (current_users != undefined && current_users?.length > 0) {
                     // ATUALIZA AS INFORMAÇÕES DO USUÁRIO
-                    var timestemp = new Date();
+                    const timestemp = new Date();
 
-                    const {data: updateUser, error} = await supabaseClient
+                    const {data: updateUser} = await supabaseClient
                       .from('users')
                       .update({updated_at: timestemp})
                       .eq('email', data?.user?.email || '')
                       .select();
-                    // console.log('updateUser', JSON.stringify(updateUser, null, 2))
+
                     if (updateUser != undefined) {
-                      dataResp.id = updateUser[0].id || null;
-                      dataResp.full_name = updateUser[0].full_name || '';
-                      dataResp.created_at = updateUser[0].created_at || '';
-                      dataResp.name = updateUser[0].name || '';
-                      dataResp.avatar_url = updateUser[0].photo || '';
-                      dataResp.description = updateUser[0].description || '';
-                      dataResp.email = updateUser[0].email || '';
-                      dataResp.updated_at = updateUser[0].updated_at || '';
+                      // ATUALIZA AS INFORMAÇÕES PARA SER GUARDADO NO REDUX
+                      FiltroObjectJson(updateUser);
                     }
                   } else {
-                    // adiciona o usuario a coluna users
-                    const {data: user_insert, error} = await supabaseClient
+                    // ADICIONA O USUÁRIO A COLUNA USERS
+                    const {data: user_insert} = await supabaseClient
                       .from('users')
                       .insert([
                         {
@@ -105,17 +113,10 @@ export function AuthGoogleComponent({...props}) {
                         },
                       ])
                       .select();
-                    // console.log('updateUser', JSON.stringify(user_insert, null, 2))
 
                     if (user_insert != undefined) {
-                      dataResp.id = user_insert[0].id || null;
-                      dataResp.full_name = user_insert[0].full_name || '';
-                      dataResp.created_at = user_insert[0].created_at || '';
-                      dataResp.name = user_insert[0].name || '';
-                      dataResp.avatar_url = user_insert[0].photo || '';
-                      dataResp.description = user_insert[0].description || '';
-                      dataResp.email = user_insert[0].email || '';
-                      dataResp.updated_at = user_insert[0].updated_at || '';
+                      // ATUALIZA AS INFORMAÇÕES PARA SER GUARDADO NO REDUX
+                      FiltroObjectJson(user_insert);
                     }
                   }
 

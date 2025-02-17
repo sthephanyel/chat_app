@@ -101,7 +101,8 @@ export default function Chat({navigation}: ChatProps) {
       .in('receiverid', [user?.id, '2'])
       .order('messageid', {ascending: true})
       .then(({data}: any) => {
-        // console.log('data', data);
+        console.log('data', data);
+        console.log('user?.id', user?.id);
         setListaDeMensagens(data);
       });
   };
@@ -142,6 +143,7 @@ export default function Chat({navigation}: ChatProps) {
   useEffect(() => {
     getMessage();
     getRealtime();
+    console.log('entrou aqui');
     // getUser()
   }, []);
 

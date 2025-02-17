@@ -104,7 +104,7 @@ export default function Home({navigation}: HomeProps) {
           </Text>
         </View>
 
-        {/* <Text style={{color: '#fff'}}>Home</Text>
+        <Text style={{color: '#fff'}}>Home</Text>
         <Text style={{color: '#fff'}}>ID: {user?.id}</Text>
         <Text style={{color: '#fff'}}>NAME: {user?.name}</Text>
         <Text style={{color: '#fff'}}>FULL NAME: {user?.full_name}</Text>
@@ -130,7 +130,7 @@ export default function Home({navigation}: HomeProps) {
             navigation.navigate('chat');
           }}>
           <Text style={{color: '#000'}}>Ir para o Chat</Text>
-        </TouchableOpacity> */}
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
