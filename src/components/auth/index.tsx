@@ -12,6 +12,21 @@ import {ActivityIndicator, Pressable} from 'react-native';
 import {RootState} from '../../redux/store';
 import IconGoogleSVG from '@assets/SVGs/icon_google.svg';
 
+export interface userGoogleASession {
+  id: number | null;
+  access_token: string | null;
+  created_at: string | null;
+  confirmed_at: string | null;
+  email: string | null;
+  email_confirmed_at: string | null;
+  updated_at: string | null;
+  avatar_url: string | null;
+  full_name: string | null;
+  name: string | null;
+  picture: string | null;
+  description: string | null;
+}
+
 export interface userSupabase {
   id: number;
   created_at: string;
@@ -28,17 +43,20 @@ export function AuthGoogleComponent({...props}) {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
 
-  function FiltroObjectJson(data: userSupabase[]) {
-    const jsonReturn: userSupabase = {};
+  function FiltroObjectJson(
+    data: userSupabase[],
+    dataRespJson: userGoogleASession,
+  ) {
+    dataRespJson.id = data[0]?.id;
+    dataRespJson.full_name = data[0]?.full_name || '';
+    dataRespJson.created_at = data[0]?.created_at || '';
+    dataRespJson.name = data[0]?.name || '';
+    dataRespJson.avatar_url = data[0]?.photo || '';
+    dataRespJson.description = data[0]?.description || '';
+    dataRespJson.email = data[0]?.email || '';
+    dataRespJson.updated_at = data[0]?.updated_at || '';
 
-    jsonReturn.id = data[0].id;
-    jsonReturn.full_name = data[0].full_name || '';
-    jsonReturn.created_at = data[0].created_at || '';
-    jsonReturn.name = data[0].name || '';
-    jsonReturn.avatar_url = data[0].photo || '';
-    jsonReturn.description = data[0].description || '';
-    jsonReturn.email = data[0].email || '';
-    jsonReturn.updated_at = data[0].updated_at || '';
+    dispatch(saveUserGoogle(dataRespJson));
   }
 
   GoogleSignin.configure({
@@ -98,7 +116,7 @@ export function AuthGoogleComponent({...props}) {
 
                     if (updateUser != undefined) {
                       // ATUALIZA AS INFORMAÇÕES PARA SER GUARDADO NO REDUX
-                      FiltroObjectJson(updateUser);
+                      FiltroObjectJson(updateUser, dataResp);
                     }
                   } else {
                     // ADICIONA O USUÁRIO A COLUNA USERS
@@ -116,11 +134,9 @@ export function AuthGoogleComponent({...props}) {
 
                     if (user_insert != undefined) {
                       // ATUALIZA AS INFORMAÇÕES PARA SER GUARDADO NO REDUX
-                      FiltroObjectJson(user_insert);
+                      FiltroObjectJson(user_insert, dataResp);
                     }
                   }
-
-                  dispatch(saveUserGoogle(dataResp));
                 }
               } else {
                 throw new Error('no ID token present!');

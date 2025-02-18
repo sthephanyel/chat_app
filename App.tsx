@@ -1,11 +1,12 @@
 import React from 'react';
-import { Routes } from './src/routes';
-import { SafeAreaView, StatusBar, StyleSheet, useColorScheme } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { LibReduxProvider } from './src/lib/libReduxProvider';
-import { LibReduxPersister } from './src/lib/libReduxPersister';
-import { DefaultTheme, PaperProvider } from 'react-native-paper';
-import { darkTheme, lightTheme } from './src/theme';
+import {Routes} from './src/routes';
+import {StatusBar, StyleSheet, useColorScheme} from 'react-native';
+import {NavigationContainer} from '@react-navigation/native';
+import {LibReduxProvider} from './src/lib/libReduxProvider';
+import {LibReduxPersister} from './src/lib/libReduxPersister';
+import {PaperProvider} from 'react-native-paper';
+import {darkTheme, lightTheme} from './src/theme';
+import Toast from 'react-native-toast-message';
 
 function App(): React.JSX.Element {
   const scheme = useColorScheme();
@@ -19,7 +20,8 @@ function App(): React.JSX.Element {
               // barStyle={isDarkMode ? 'light-content' : 'dark-content'}
               backgroundColor={'#000'}
             />
-            <Routes/>
+            <Routes />
+            <Toast />
           </LibReduxPersister>
         </NavigationContainer>
       </PaperProvider>

@@ -9,6 +9,8 @@ import {
   Image,
   StatusBar,
   ScrollView,
+  FlatList,
+  RefreshControl,
 } from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import {RootState} from '../../redux/store';
@@ -16,15 +18,29 @@ import {supabaseClient} from '../../lib/libSupabase';
 import {useTheme} from 'react-native-paper';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import IconInfinit from '@assets/SVGs/logo_infinit.svg';
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
+import {saveUserGoogle} from '@redux/reducers/User';
+import Toast from 'react-native-toast-message';
 
 interface HomeProps {
   navigation: NativeStackNavigationProp<any, 'home'>;
+}
+
+export interface contactsDate {
+  userid: number;
+  blocked: boolean | null;
+  contactid: number;
+  contactuserid: number;
+  nickname: string | null;
 }
 
 export default function Home({navigation}: HomeProps) {
   const dispatch = useDispatch();
   const theme = useTheme();
   const {user} = useSelector((state: RootState) => state.user);
+
+  const [contactList, setContactList] = useState<contactsDate[]>();
+  const [loading, setLoading] = useState(false);
 
   const getUser = async () => {
     let {data: users, error} = await supabaseClient
@@ -39,20 +55,50 @@ export default function Home({navigation}: HomeProps) {
   };
 
   const getContacts = async () => {
-    let {data, error, status} = await supabaseClient
-      .from('contacts')
-      .select('*')
-      .eq('userid', user.id);
-
-    if (data != undefined && data?.length > 0) {
-      console.log('users', data);
+    try {
+      setLoading(true);
+      let {data, error, status, count} = await supabaseClient
+        .from('contacts')
+        .select('*')
+        .in('userid', [user?.id]);
+      if (data != undefined && data?.length > 0) {
+        console.log('data contact', data);
+        setContactList(data);
+      }
+    } catch (error) {
+      console.log('contacts erros', error);
+    } finally {
+      setLoading(false);
     }
-    console.log('error', error);
+  };
+
+  const renderContacts = ({item}: {item: contactsDate}) => {
+    return (
+      <TouchableOpacity
+        style={{backgroundColor: 'blue', padding: 10}}
+        onPress={() => {
+          // navigation.navigate('chat', {
+          //   contact_id: item?.contactuserid,
+          // });
+
+          Toast.show({
+            type: 'success',
+            text1: `Usuario ${item?.nickname} esta online`,
+            text2: 'entre em contato com ele',
+          });
+        }}>
+        <View style={{backgroundColor: 'gray', margin: 4}}>
+          <Text>Contato</Text>
+          <Text>{item?.contactuserid}</Text>
+          <Text>{item?.nickname}</Text>
+        </View>
+      </TouchableOpacity>
+    );
   };
 
   useEffect(() => {
     // getUser()
-    // getContacts();
+    getContacts();
   }, []);
 
   return (
@@ -103,7 +149,7 @@ export default function Home({navigation}: HomeProps) {
             PESQUISAR
           </Text>
         </View>
-
+        {/* 
         <Text style={{color: '#fff'}}>Home</Text>
         <Text style={{color: '#fff'}}>ID: {user?.id}</Text>
         <Text style={{color: '#fff'}}>NAME: {user?.name}</Text>
@@ -123,15 +169,44 @@ export default function Home({navigation}: HomeProps) {
           source={{
             uri: user.picture,
           }}
-        />
-        <TouchableOpacity
+        /> */}
+        {/* <TouchableOpacity
           style={{backgroundColor: 'blue', padding: 10}}
           onPress={() => {
             navigation.navigate('chat');
           }}>
           <Text style={{color: '#000'}}>Ir para o Chat</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity
+          style={{backgroundColor: 'red', padding: 10}}
+          onPress={async () => {
+            try {
+              await GoogleSignin.configure({});
+              // remove do acesso dos acessos autorizados da google
+              // await GoogleSignin.revokeAccess();
+              // sai do usuario atual
+              await GoogleSignin.signOut();
+              dispatch(saveUserGoogle({}));
+            } catch (error) {
+              console.error(error);
+            }
+          }}>
+          <Text style={{color: '#000'}}>Sair</Text>
+        </TouchableOpacity> */}
       </ScrollView>
+      <FlatList
+        data={contactList}
+        renderItem={renderContacts}
+        keyExtractor={(item, index) => index.toString()}
+        refreshing={loading}
+        refreshControl={
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={() => getContacts()}
+          />
+        }
+      />
     </SafeAreaView>
   );
 }

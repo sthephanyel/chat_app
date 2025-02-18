@@ -14,21 +14,21 @@ export function Routes() {
   const {user} = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
 
+  function checkSession(data: any) {
+    if (data) {
+      setSession(data);
+    } else {
+      dispatch(saveUserGoogle({}));
+    }
+  }
+
   useEffect(() => {
     supabaseClient.auth.getSession().then(({data: {session}}) => {
-      if (session) {
-        setSession(session);
-      } else {
-        dispatch(saveUserGoogle({}));
-      }
+      checkSession(session);
     });
 
     supabaseClient.auth.onAuthStateChange((_event, session) => {
-      if (session) {
-        setSession(session);
-      } else {
-        dispatch(saveUserGoogle({}));
-      }
+      checkSession(session);
     });
   }, []);
 

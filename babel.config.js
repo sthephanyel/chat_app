@@ -23,6 +23,7 @@ module.exports = {
           '@routes': './src/routes',
           '@theme': './src/theme',
           '@assets': './src/assets',
+          '@config': './src/config',
         },
       },
     ],

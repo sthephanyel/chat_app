@@ -45,9 +45,10 @@ export interface messageState {
 
 interface ChatProps {
   navigation: NativeStackNavigationProp<any, 'chat'>;
+  route: any;
 }
 
-export default function Chat({navigation}: ChatProps) {
+export default function Chat({navigation, route}: ChatProps) {
   const dispatch = useDispatch();
   const theme = useTheme();
   const {editProfile} = useSelector((state: RootState) => state.profile);
@@ -56,11 +57,17 @@ export default function Chat({navigation}: ChatProps) {
   const [mensagem, setMensagem] = useState('');
   const [listaDeMensagens, setListaDeMensagens] = useState<messageState[]>([]);
 
+  const {contact_id} = route.params;
+
+  console.log('contact_id', contact_id);
+
   const handleInserts = (payload: realtimeReturn) => {
     // console.log('Change received!', payload);
     if (
-      (payload?.new?.receiverid == 2 || payload?.new?.receiverid == user?.id) &&
-      (payload?.new?.senderid == user?.id || payload?.new?.senderid == 2)
+      (payload?.new?.receiverid == contact_id ||
+        payload?.new?.receiverid == user?.id) &&
+      (payload?.new?.senderid == user?.id ||
+        payload?.new?.senderid == contact_id)
     ) {
       // console.log('incrementou');
       setListaDeMensagens(valorAtualDaLista => {
@@ -79,7 +86,7 @@ export default function Chat({navigation}: ChatProps) {
           schema: 'public',
           table: 'messages',
           // filters: 'senderid.eq.2,senderid.eq.5',
-          filters: `senderid=in.(${user?.id}, 2),receiverid=in.(${user?.id}, 2)`,
+          filters: `senderid=in.(${user?.id}, ${contact_id}),receiverid=in.(${user?.id}, ${contact_id})`,
         },
         handleInserts,
       )
@@ -97,8 +104,8 @@ export default function Chat({navigation}: ChatProps) {
     await supabaseClient
       .from('messages')
       .select('*')
-      .in('senderid', [user?.id, '2'])
-      .in('receiverid', [user?.id, '2'])
+      .in('senderid', [user?.id, contact_id])
+      .in('receiverid', [user?.id, contact_id])
       .order('messageid', {ascending: true})
       .then(({data}: any) => {
         console.log('data', data);
